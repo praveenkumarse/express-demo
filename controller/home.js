@@ -1,4 +1,28 @@
 var userInfo = require("./../model/home");
+var multer = require('multer')
+var upload = multer({ dest: './public/uploads' });
+var path = require('path');
+var multiparty = require('multiparty');
+
+var storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, './public/uploads')
+    },
+    filename: function(req, file, callback) {
+        callback(null, file.originalname)
+    }
+})
+var upload = multer({
+    storage: storage,
+    fileFilter: function(req, file, callback) {
+        var ext = path.extname(file.originalname)
+        if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+            return callback(res.end('Only images are allowed'), null)
+        }
+        callback(null, true)
+    }
+}).array('file', 12);
+
 
 module.exports.controller = function(app) {
     app.get('/info', function(req, res, next) {
@@ -14,8 +38,14 @@ module.exports.controller = function(app) {
     app.post('/add', function(req, res, next) {
 
         var query = {},
-            update = { expire: new Date() },
-            options = { upsert: true, new: true, setDefaultsOnInsert: true };
+            update = {
+                expire: new Date()
+            },
+            options = {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true
+            };
         userInfo.findOneAndUpdate(query, update, options, function(error, result) {
             if (error) return;
             result.info = req.body.info;
@@ -26,25 +56,45 @@ module.exports.controller = function(app) {
         });
     });
     app.delete('/delete/:id', function(req, res, next) {
-        userInfo.findOneAndUpdate({}, { $pull: { info: { _id: req.params.id } } },
+        userInfo.findOneAndUpdate({}, {
+                $pull: {
+                    info: {
+                        _id: req.params.id
+                    }
+                }
+            },
             function(err, data) {
                 if (err) return err;
                 res.json("Data delete successfully")
             });
     });
     app.put('/update/:id', function(req, res, next) {
-        userInfo.find({}, { info: { $elemMatch: { _id: req.params.id } } },
-            function(error, data) {
-                userInfo.update({ 'data._id': req.params.id }, {
-                    '$set': {
-                        'data.$.firstName': req.body.firstName,
-                        'data.$.lastName': req.body.firstName,
-                        'data.$.number': req.body.number,
-                    }
-                }, function(err) {
-                    if (err) return err;
-                    res.json("Update Data Successfully")
-                });
-            })
+        userInfo.update({
+            'info._id': req.params.id
+        }, {
+            '$set': {
+                'info.$.firstName': req.body.firstName,
+                'info.$.lastName': req.body.lastName,
+                'info.$.number': req.body.number,
+            }
+        }, function(err, data) {
+            if (err) return err;
+            res.json(data)
+        });
+    });
+
+    app.post('/upload', function(req, res, next) {
+
+        var form = new multiparty.Form();
+        form.parse(req, function(err, fields, files) {
+            console.log("hello ", fields, files)
+        });
+
+        upload(req, res, function(err) {
+            console.log
+            res.end('File is uploaded')
+        })
+
     })
+
 }
