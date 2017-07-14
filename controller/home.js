@@ -12,6 +12,7 @@ var storage = multer.diskStorage({
         callback(null, file.originalname)
     }
 })
+
 var upload = multer({
     storage: storage,
     fileFilter: function(req, file, callback) {
@@ -24,8 +25,8 @@ var upload = multer({
 }).array('file', 12);
 
 
-module.exports.controller = function(app) {
-    app.get('/info', function(req, res, next) {
+module.exports = {
+    get_home_info: function(req, res, next) {
         let info;
         userInfo.find({}).then(function(data) {
             res.json({
@@ -34,9 +35,8 @@ module.exports.controller = function(app) {
         }, err => {
 
         })
-    });
-    app.post('/add', function(req, res, next) {
-
+    },
+    post_home_info: function(req, res, next) {
         var query = {},
             update = {
                 expire: new Date()
@@ -53,9 +53,10 @@ module.exports.controller = function(app) {
                 if (err) throw err;
                 res.json("add data successfully")
             })
-        });
-    });
-    app.delete('/delete/:id', function(req, res, next) {
+        })
+
+    },
+    delete_home_info: function(req, res, next) {
         userInfo.findOneAndUpdate({}, {
                 $pull: {
                     info: {
@@ -67,8 +68,8 @@ module.exports.controller = function(app) {
                 if (err) return err;
                 res.json("Data delete successfully")
             });
-    });
-    app.put('/update/:id', function(req, res, next) {
+    },
+    update_home_info: function(req, res, next) {
         userInfo.update({
             'info._id': req.params.id
         }, {
@@ -81,20 +82,16 @@ module.exports.controller = function(app) {
             if (err) return err;
             res.json(data)
         });
-    });
-
-    app.post('/upload', function(req, res, next) {
-
+    },
+    home_image_upload: function(req, res, next) {
         var form = new multiparty.Form();
         form.parse(req, function(err, fields, files) {
             console.log("hello ", fields, files)
         });
-
         upload(req, res, function(err) {
             console.log
             res.end('File is uploaded')
         })
 
-    })
-
+    }
 }
