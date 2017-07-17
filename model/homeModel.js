@@ -5,11 +5,12 @@ var schema = {}
 var info = new Schema({
 
     info: [{
+        user:String,
         firstName: String,
         lastName: String,
-        number: Number
+        number: Number,
     }]
 
 })
 
-module.exports = mongoose.model("information", info);
+module.exports = mongoose.model("dashboard", info);

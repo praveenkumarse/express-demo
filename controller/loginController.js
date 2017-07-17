@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
-var User = require('../model/user');
-var authConfig = require('./auth');
+var User = require('../model/loginModel');
+var authConfig = require('./../config/auth');
 
 function generateToken(user) {
     return jwt.sign(user, authConfig.secret, {
@@ -11,22 +11,21 @@ function generateToken(user) {
 function setUserInfo(request) {
     return {
         _id: request._id,
-        email: request.email,
-        role: request.role
+        email: request.email
     };
 }
 
-exports.login = function(req, res, next) {
+exports.login = function (req, res, next) {
 
     var userInfo = setUserInfo(req.body);
     res.status(200).json({
-        token: 'JWT ' + generateToken(userInfo),
+        token: generateToken(userInfo),
         user: userInfo
     });
 
 }
 
-exports.register = function(req, res, next) {
+exports.register = function (req, res, next) {
 
     var email = req.body.email;
     var password = req.body.password;
@@ -40,7 +39,7 @@ exports.register = function(req, res, next) {
         return res.status(422).send({ error: 'You must enter a password' });
     }
 
-    User.findOne({ email: email }, function(err, existingUser) {
+    User.findOne({ email: email }, function (err, existingUser) {
 
         if (err) {
             return next(err);
@@ -56,7 +55,7 @@ exports.register = function(req, res, next) {
             role: role
         });
 
-        user.save(function(err, user) {
+        user.save(function (err, user) {
 
             if (err) {
                 return next(err);
@@ -65,7 +64,7 @@ exports.register = function(req, res, next) {
             var userInfo = setUserInfo(user);
 
             res.status(201).json({
-                token: 'JWT ' + generateToken(userInfo),
+                token: generateToken(userInfo),
                 user: userInfo
             })
 
@@ -75,20 +74,18 @@ exports.register = function(req, res, next) {
 
 }
 
-exports.roleAuthorization = function(roles) {
+exports.roleAuthorization = function (roles) {
 
-    return function(req, res, next) {
-
-        var user = req.user;
-
-        User.findById(user._id, function(err, foundUser) {
-
+    return function (req, res, next) {
+        var authorization = req.get('Authorization')
+        var user = jwt.verify(authorization, authConfig.secret);
+        User.find(user.email, function (err, foundUser) {
             if (err) {
                 res.status(422).json({ error: 'No user found.' });
                 return next(err);
             }
 
-            if (roles.indexOf(foundUser.role) > -1) {
+            if (roles.indexOf(foundUser[0].role) > -1) {
                 return next();
             }
 
@@ -98,5 +95,4 @@ exports.roleAuthorization = function(roles) {
         });
 
     }
-
 }

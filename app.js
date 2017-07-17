@@ -6,8 +6,8 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session')
 var bodyParser = require('body-parser');
 var fs = require("fs");
-var routes = require('./routes/index');
-var routesInfo = require('./routes/routes');
+var index = require('./routes/index');
+var routes = require('./routes/routes');
 var db = require("./config/config")
 var app = express();
 var cors = require('cors')
@@ -35,8 +35,8 @@ app.use(function(req, res, next) {
     next();
 })
 
-app.use('/', routes);
-routesInfo(app);
+app.use('/', index);
+routes(app);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
