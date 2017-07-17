@@ -4,7 +4,7 @@ var authConfig = require('./../config/auth');
 
 function generateToken(user) {
     return jwt.sign(user, authConfig.secret, {
-        expiresIn: 10080
+        expiresIn: 200
     });
 }
 
@@ -15,7 +15,7 @@ function setUserInfo(request) {
     };
 }
 
-exports.login = function (req, res, next) {
+exports.login = function(req, res, next) {
 
     var userInfo = setUserInfo(req.body);
     res.status(200).json({
@@ -25,7 +25,7 @@ exports.login = function (req, res, next) {
 
 }
 
-exports.register = function (req, res, next) {
+exports.register = function(req, res, next) {
 
     var email = req.body.email;
     var password = req.body.password;
@@ -39,7 +39,7 @@ exports.register = function (req, res, next) {
         return res.status(422).send({ error: 'You must enter a password' });
     }
 
-    User.findOne({ email: email }, function (err, existingUser) {
+    User.findOne({ email: email }, function(err, existingUser) {
 
         if (err) {
             return next(err);
@@ -55,7 +55,7 @@ exports.register = function (req, res, next) {
             role: role
         });
 
-        user.save(function (err, user) {
+        user.save(function(err, user) {
 
             if (err) {
                 return next(err);
@@ -74,25 +74,34 @@ exports.register = function (req, res, next) {
 
 }
 
-exports.roleAuthorization = function (roles) {
+exports.roleAuthorization = function(roles) {
 
-    return function (req, res, next) {
+    return function(req, res, next) {
         var authorization = req.get('Authorization')
-        var user = jwt.verify(authorization, authConfig.secret);
-        User.find(user.email, function (err, foundUser) {
+        var user;
+        jwt.verify(authorization, authConfig.secret, function(err, token) {
             if (err) {
-                res.status(422).json({ error: 'No user found.' });
-                return next(err);
+                console.log(err)
+                res.status(401).json({ error: 'Token expired' });
+            } else {
+                console.log("token")
+                User.find(token.email, function(err, foundUser) {
+                    if (err) {
+                        res.status(422).json({ error: 'No user found.' });
+                        return next(err);
+                    }
+
+                    if (roles.indexOf(foundUser[0].role) > -1) {
+                        return next();
+                    }
+
+                    res.status(401).json({ error: 'You are not authorized to view this content' });
+                    return next('Unauthorized');
+
+                });
             }
+        })
 
-            if (roles.indexOf(foundUser[0].role) > -1) {
-                return next();
-            }
-
-            res.status(401).json({ error: 'You are not authorized to view this content' });
-            return next('Unauthorized');
-
-        });
 
     }
 }

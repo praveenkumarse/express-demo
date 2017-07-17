@@ -6,9 +6,9 @@ var AuthenticationController = require('./../controller/loginController'),
     passport = require('passport');
 
 var requireAuth = passport.authenticate('jwt', { session: false });
-    requireLogin = passport.authenticate('local', { session: false });
+requireLogin = passport.authenticate('local', { session: false });
 
-module.exports = function (app) {
+module.exports = function(app) {
 
     var apiRoutes = express.Router(),
         authRoutes = express.Router(),
@@ -20,16 +20,17 @@ module.exports = function (app) {
     authRoutes.post('/register', AuthenticationController.register);
     authRoutes.post('/login', requireLogin, AuthenticationController.login);
 
-    authRoutes.get('/protected', requireAuth, function (req, res) {
+    authRoutes.get('/protected', requireAuth, function(req, res) {
         res.send({ content: 'Success' });
     });
 
     // home Routes
     apiRoutes.use('/home', home);
-    home.get('/',AuthenticationController.roleAuthorization(['admin','user']), homeController.get_home_info);
+    home.get('/', AuthenticationController.roleAuthorization(['admin', 'user']), homeController.get_home_info);
     home.post('/', AuthenticationController.roleAuthorization(['admin']), homeController.post_home_info);
     home.put('/:id', AuthenticationController.roleAuthorization(['admin']), homeController.update_home_info);
     home.delete('/:id', AuthenticationController.roleAuthorization(['admin']), homeController.delete_home_info);
+    home.post('/upload', AuthenticationController.roleAuthorization(['admin']), homeController.home_image_upload);
 
     // Set up routes
     app.use('/api', apiRoutes);
