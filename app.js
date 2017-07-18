@@ -11,7 +11,8 @@ var routes = require('./routes/routes');
 var db = require("./config/config")
 var app = express();
 var cors = require('cors')
-
+var autho = require('./routes/autho-routes.js');
+const authenticate = require("./config/autho.js");
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -34,9 +35,9 @@ app.use(function(req, res, next) {
     console.log('Request Type:', req.method)
     next();
 })
-
-app.use('/', index);
-routes(app);
+authenticate(app);
+app.use('/', autho);
+// routes(app);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
