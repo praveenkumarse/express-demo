@@ -4,7 +4,7 @@ var upload = multer({ dest: './public/uploads' });
 var path = require('path');
 var multiparty = require('multiparty');
 var jwt = require('jsonwebtoken');
-var authConfig = require('./../config/auth');
+var authConfig = require('./../config/key');
 
 var storage = multer.diskStorage({
     destination: function(req, file, callback) {

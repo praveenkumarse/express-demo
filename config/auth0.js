@@ -1,16 +1,17 @@
-module.exports = function(app) {
+var express=require("express");
+var app = express();
     const passport = require('passport');
     const Auth0Strategy = require('passport-auth0');
 
     // Configure Passport to use Auth0
     const strategy = new Auth0Strategy({
             domain: 'praveenkumarse.auth0.com',
-            clientID: '1prr60921BHGBdweKJYWwn3mUi2CaP34',
-            clientSecret: 'BInuDysugNp_9g94Zs88QefVx-25zynvBR2xSJZHxymLPMRv7O-TR_g75MltbHz0',
+            clientID: '7Yrl8WKbYcMG0Q4UfuR2yMKxwqIdZsuS',
+            clientSecret: 'jdME03-bgfX6JlvVW_pFzs_Rgba_GYNbt3b2t9sMEAl4LdQ9EWSundHyb4mD4XhW',
             callbackURL: 'http://localhost:3000/callback'
         },
         (accessToken, refreshToken, extraParams, profile, done) => {
-            return done(null, profile);
+            return done(null, profile,extraParams);
         }
     );
 
@@ -24,8 +25,6 @@ module.exports = function(app) {
     passport.deserializeUser(function(user, done) {
         done(null, user);
     });
+app.use(passport.session());
 
-    // ...
-    app.use(passport.initialize());
-    app.use(passport.session());
-}
+
