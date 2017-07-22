@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = express.Router();
 const config = require("./../config/auth0");
 var request = require("request");
+var base64 = require('node-base64-image');
 const env = {
     AUTH0_CLIENT_ID: '7Yrl8WKbYcMG0Q4UfuR2yMKxwqIdZsuS',
     AUTH0_DOMAIN: 'praveenkumarse.auth0.com',
@@ -43,5 +44,8 @@ router.get('/callback', passport.authenticate('auth0', {
     console.log("data0", req.user,req.authInfo)
     res.send(req.user)
 });
+
+
+
 
 module.exports = router;
