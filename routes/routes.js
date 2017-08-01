@@ -23,16 +23,34 @@ module.exports = function(app) {
     authRoutes.get('/protected', requireAuth, function(req, res) {
         res.send({ content: 'Success' });
     });
+    authRoutes.get('/profile', function(req, res) {
+        res.json("login");
+    });
+    //Social Login
+
+    authRoutes.get('/google', passport.authenticate('google', {
+        scope: ['https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email'
+        ],
+        accessType: 'offline',
+        prompt: 'consent'
+    }));
+    authRoutes.get('/callback',
+        passport.authenticate('google', {
+            successRedirect: '/auth/profile',
+            failureRedirect: '/'
+        }));
+
+
 
     // home Routes
     apiRoutes.use('/home', home);
-    home.get('/', AuthenticationController.roleAuthorization(['admin', 'user']), homeController.get_home_info);
-    home.post('/', AuthenticationController.roleAuthorization(['admin']), homeController.post_home_info);
-    home.put('/:id', AuthenticationController.roleAuthorization(['admin']), homeController.update_home_info);
-    home.delete('/:id', AuthenticationController.roleAuthorization(['admin']), homeController.delete_home_info);
-    home.post('/upload', AuthenticationController.roleAuthorization(['admin']), homeController.home_image_upload);
+    home.get('/', requireAuth, homeController.get_home_info);
+    home.post('/', requireAuth, homeController.post_home_info);
+    home.put('/:id', requireAuth, homeController.update_home_info);
+    home.delete('/:id', requireAuth, homeController.delete_home_info);
+    home.post('/upload', requireAuth, homeController.home_image_upload);
 
     // Set up routes
     app.use('/api', apiRoutes);
-
 }
