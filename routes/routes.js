@@ -15,6 +15,10 @@ module.exports = function(app) {
         home = express.Router();
 
     // Auth Routes
+    app.get('/', function(req, res, next) {
+        res.render('index');
+    });
+
     app.use('/auth', authRoutes);
 
     authRoutes.post('/register', AuthenticationController.register);
@@ -50,7 +54,10 @@ module.exports = function(app) {
     home.put('/:id', requireAuth, homeController.update_home_info);
     home.delete('/:id', requireAuth, homeController.delete_home_info);
     home.post('/upload', requireAuth, homeController.home_image_upload);
+    home.post('/addproduct', homeController.add_product_list);
+    home.get('/getproductlist', homeController.get_product_list)
 
     // Set up routes
+
     app.use('/api', apiRoutes);
 }

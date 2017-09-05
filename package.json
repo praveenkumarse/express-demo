@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "async": "^2.5.0",
     "atob": "^2.0.3",
     "auth0-js": "^8.8.0",
     "bcrypt": "^1.0.2",
@@ -27,6 +28,7 @@
     "passport": "^0.3.2",
     "passport-auth0": "^0.6.0",
     "passport-google-oauth": "^1.0.0",
+    "passport-google-oauth2": "^0.1.6",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
     "serve-favicon": "~2.3.0",

@@ -1,10 +1,10 @@
-var userInfo = require("./../model/homeModel");
+var homeInfo = require("./../model/homeModel");
 var multer = require('multer')
-var upload = multer({ dest: './public/uploads' });
 var path = require('path');
 var multiparty = require('multiparty');
 var jwt = require('jsonwebtoken');
 var authConfig = require('./../config/key');
+var form = new multiparty.Form();
 
 var storage = multer.diskStorage({
     destination: function(req, file, callback) {
@@ -24,7 +24,7 @@ var upload = multer({
         }
         callback(null, true)
     }
-}).array('file', 12);
+}).single('image');
 
 
 module.exports = {
@@ -87,7 +87,6 @@ module.exports = {
         });
     },
     home_image_upload: function(req, res, next) {
-        var form = new multiparty.Form();
         form.parse(req, function(err, fields, files) {
             console.log("hello ", fields, files)
         });
@@ -96,5 +95,33 @@ module.exports = {
             res.end('File is uploaded')
         })
 
+    },
+    add_product_list: function(req, res, next) {
+        upload(req, res, (err) => {
+            if (err) throw err;
+
+        })
+        form.parse(req, function(err, fields, files) {
+            let data = new homeInfo.product_list({
+                name: fields.name,
+                cost: parseInt(fields.cost),
+                discreption: fields.discreption,
+                offer: parseInt(fields.offer),
+                image: files.image[0].originalFilename
+            });
+            data.save((err) => {
+                if (err) throw err;
+                res.json("Data save successfully")
+
+            })
+        })
+
+    },
+    get_product_list: (req, res, next) => {
+        homeInfo.product_list.find({}, (err, data) => {
+            if (err) throw err;
+            res.json(data);
+        })
     }
+
 }

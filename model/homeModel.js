@@ -12,4 +12,17 @@ var info = new Schema({
 
 })
 
-module.exports = mongoose.model("dashboard", info);
+var productList = new Schema({
+
+    name: String,
+    cost: Number,
+    discreption: String,
+    offer: Number,
+    image: String
+})
+
+
+module.exports = {
+    product_list: mongoose.model("product_list", productList),
+    info: mongoose.model("dashboard", info)
+}
