@@ -6,6 +6,7 @@ var multiparty = require('multiparty');
 var jwt = require('jsonwebtoken');
 var authConfig = require('./../config/key');
 
+
 var storage = multer.diskStorage({
     destination: function(req, file, callback) {
         callback(null, './public/uploads')
@@ -96,5 +97,18 @@ module.exports = {
             res.end('File is uploaded')
         })
 
+    },
+
+    product_list:(req,res,next)=>{
+        var form = new multiparty.Form();
+        form.parse(req, function(err, fields, files) {
+            console.log("req",fields,files);
+            
+        });
+       
+        // form.parse(req,(err,fields,files)=>{
+        //     console.log("req",err,fields,files);
+        // })
+       
     }
 }
