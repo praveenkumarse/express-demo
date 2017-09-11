@@ -12,6 +12,7 @@ var db = require("./config/config")
 var app = express();
 var cors = require('cors')
 var auth0 = require('./routes/auth0-routes');
+var getIP = require('ipware')().get_ip;
 const passport = require('passport');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -29,13 +30,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors())
 
-app.use(function(req, res, next) {
-    console.log('Request URL:', req.originalUrl)
-    next();
-}, function(req, res, next) {
-    console.log('Request Type:', req.method)
-    next();
-})
 app.use(passport.initialize());
 // app.use('/', auth0);
 routes(app);

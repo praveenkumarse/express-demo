@@ -46,17 +46,15 @@ var localLogin = new LocalStrategy(localOptions, function(email, password, done)
 
 
 var jwtOptions = {
-    jwtFromRequest: ExtractJwt.fromAuthHeader(),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: config.secret
 };
 
 var jwtLogin = new JwtStrategy(jwtOptions, function(payload, done) {
-    User.findById(payload._id, function(err, user) {
-
+    User.find({email:payload}, function(err, user) {
         if (err) {
             return done(err, false);
         }
-
         if (user) {
             done(null, user);
         } else {
@@ -67,16 +65,7 @@ var jwtLogin = new JwtStrategy(jwtOptions, function(payload, done) {
 
 });
 
-// used to serialize the user for the session
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-});
-// used to deserialize the user
-passport.deserializeUser(function(id, done) {
-    User.findById(id, function(err, user) {
-        done(err, user);
-    });
-});
+
 passport.use(localLogin);
 passport.use(jwtLogin);
 

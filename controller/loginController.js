@@ -3,9 +3,7 @@ var User = require('../model/loginModel');
 var authConfig = require('./../config/key');
 
 function generateToken(user) {
-    return jwt.sign(user, authConfig.secret, {
-        expiresIn: 200
-    });
+    return jwt.sign(user, authConfig.secret)
 }
 
 function setUserInfo(request) {
@@ -15,21 +13,27 @@ function setUserInfo(request) {
     };
 }
 
-exports.login = function(req, res, next) {
-
-    var userInfo = setUserInfo(req.body);
-    res.status(200).json({
-        token: generateToken(userInfo),
-        user: userInfo
-    });
-
+exports.login = function (req, res, next) {
+    User.findOne({ email: req.body.email }, function (err, data) {
+        if (err) throw err;
+        data.comparePassword(req.body.password, function (err, match) {
+            if (err) throw err;
+            if (match) {
+                res.status(200).json({
+                    token:generateToken(data.email)
+                })
+            } else {
+                res.json("password doesn't exist")
+            }
+        })
+    })
 }
 
-exports.register = function(req, res, next) {
+exports.register = function (req, res, next) {
 
     var email = req.body.email;
     var password = req.body.password;
-    var role = req.body.role;
+
 
     if (!email) {
         return res.status(422).send({ error: 'You must enter an email address' });
@@ -39,7 +43,7 @@ exports.register = function(req, res, next) {
         return res.status(422).send({ error: 'You must enter a password' });
     }
 
-    User.findOne({ email: email }, function(err, existingUser) {
+    User.findOne({ email: email }, function (err, existingUser) {
 
         if (err) {
             return next(err);
@@ -50,12 +54,13 @@ exports.register = function(req, res, next) {
         }
 
         var user = new User({
+            name: req.body.name,
             email: email,
             password: password,
-            role: role
+            role: req.body.role
         });
 
-        user.save(function(err, user) {
+        user.save(function (err, user) {
 
             if (err) {
                 return next(err);
@@ -74,34 +79,3 @@ exports.register = function(req, res, next) {
 
 }
 
-exports.roleAuthorization = function(roles) {
-
-    return function(req, res, next) {
-        var authorization = req.get('Authorization')
-        var user;
-        jwt.verify(authorization, authConfig.secret, function(err, token) {
-            if (err) {
-                console.log(err)
-                res.status(401).json({ error: 'Token expired' });
-            } else {
-                console.log("token")
-                User.find(token.email, function(err, foundUser) {
-                    if (err) {
-                        res.status(422).json({ error: 'No user found.' });
-                        return next(err);
-                    }
-
-                    if (roles.indexOf(foundUser[0].role) > -1) {
-                        return next();
-                    }
-
-                    res.status(401).json({ error: 'You are not authorized to view this content' });
-                    return next('Unauthorized');
-
-                });
-            }
-        })
-
-
-    }
-}

@@ -18,7 +18,7 @@ module.exports = function (app) {
     app.use('/auth', authRoutes);
 
     authRoutes.post('/register', AuthenticationController.register);
-    authRoutes.post('/login', requireLogin, AuthenticationController.login);
+    authRoutes.post('/login', AuthenticationController.login);
 
     authRoutes.get('/protected', requireAuth, function (req, res) {
         res.send({ content: 'Success' });
@@ -35,23 +35,22 @@ module.exports = function (app) {
         accessType: 'offline',
         prompt: 'consent'
     }));
+
     authRoutes.get('/callback',
         passport.authenticate('google', {
             successRedirect: '/auth/profile',
             failureRedirect: '/'
         }));
-
-
-
     // home Routes
     apiRoutes.use('/home', home);
-    home.get('/', requireAuth, homeController.get_home_info);
-    home.post('/', requireAuth, homeController.post_home_info);
-    home.put('/:id', requireAuth, homeController.update_home_info);
-    home.delete('/:id', requireAuth, homeController.delete_home_info);
-    home.post('/upload', requireAuth, homeController.home_image_upload);
+    home.get('/', requireAuth, homeController.get_home_info)
+        .post('/', requireAuth, homeController.post_home_info)
+        .put('/:id', requireAuth, homeController.update_home_info)
+        .delete('/:id', requireAuth, homeController.delete_home_info)
+        .post('/upload', requireAuth, homeController.home_image_upload)
+        .post('/productlist',requireAuth, homeController.add_product_list)
+        .get('/productlist',requireAuth, homeController.get_product_list);
 
-    home.post('/productlist', homeController.product_list)
     // Set up routes
     app.use('/api', apiRoutes);
 }

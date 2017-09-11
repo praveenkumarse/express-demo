@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var bcrypt = require('bcrypt-nodejs');
+var bcrypt = require('bcrypt');
 var mongoose = require('mongoose');
 var UserSchema = new mongoose.Schema({
     name: {
@@ -18,7 +18,6 @@ var UserSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['user', 'admin'],
         default: 'admin'
     }
 }, {
@@ -27,39 +26,21 @@ var UserSchema = new mongoose.Schema({
 
 
 
-UserSchema.pre('save', function(next) {
-
-    var user = this;
-    var SALT_FACTOR = 5;
-
-    if (!user.isModified('password')) {
-        return next();
+UserSchema.pre('save',async function(next) {
+    try{
+        const passwordSalt=await bcrypt.genSalt(10);
+        const hashPassword=await bcrypt.hash(this.password,passwordSalt);
+        this.password=hashPassword;
+        next();
+    }catch(exception){
+        console.log(exception)
     }
+  
 
-    bcrypt.genSalt(SALT_FACTOR, function(err, salt) {
+})
 
-        if (err) {
-            return next(err);
-        }
-
-        bcrypt.hash(user.password, salt, null, function(err, hash) {
-
-            if (err) {
-                return next(err);
-            }
-
-            user.password = hash;
-            next();
-
-        });
-
-    });
-
-});
-
-UserSchema.methods.comparePassword = function(passwordAttempt, cb) {
-
-    bcrypt.compare(passwordAttempt, this.password, function(err, isMatch) {
+UserSchema.methods.comparePassword = function(plainPassword, cb) {
+    bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
 
         if (err) {
             return cb(err);

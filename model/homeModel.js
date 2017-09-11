@@ -1,23 +1,29 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
-var info = new Schema({
+const baseOptions = {
+    discriminatorKey: '__type',
+    collection: 'data'
+}
+const Base = mongoose.model('Base', new mongoose.Schema({}, baseOptions));
+
+const Info = Base.discriminator('Info', new mongoose.Schema({
     info: [{
         user: String,
         firstName: String,
         lastName: String,
         number: Number,
     }]
+}));
 
-})
-
-var product_list = new Schema({
+const product_list = Base.discriminator('product_list', new mongoose.Schema({
     product_name: String,
-    price: Number,
+    cost: Number,
     image: String,
     discreption: String
-})
+}));
+
 module.exports = {
-    info: mongoose.model("dashboard", info),
-    product_list: mongoose.model("product_list", product_list)
-} 
+    Info,
+    product_list
+}; 
