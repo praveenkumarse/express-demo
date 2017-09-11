@@ -1,6 +1,5 @@
 var { Info, product_list } = require("./../model/homeModel");
 var multer = require('multer')
-var upload = multer({ dest: './public/uploads' });
 var path = require('path');
 var multiparty = require('multiparty');
 var jwt = require('jsonwebtoken');
@@ -114,4 +113,5 @@ module.exports = {
            })
        })
     }
+
 }

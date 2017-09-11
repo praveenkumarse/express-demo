@@ -15,6 +15,10 @@ module.exports = function (app) {
         home = express.Router();
 
     // Auth Routes
+    app.get('/', function(req, res, next) {
+        res.render('index');
+    });
+
     app.use('/auth', authRoutes);
 
     authRoutes.post('/register', AuthenticationController.register);
@@ -52,5 +56,6 @@ module.exports = function (app) {
         .get('/productlist',requireAuth, homeController.get_product_list);
 
     // Set up routes
+
     app.use('/api', apiRoutes);
 }
